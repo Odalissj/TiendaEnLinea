@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link href="../css/bootstrap-icons.css" rel="stylesheet" />
     <link href="../content/Estilo1.css" rel="stylesheet" />
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark custom-navbar">
         <div class="container-fluid">
@@ -16,8 +18,8 @@
             <div class="d-flex justify-content-end align-items-center ms-auto">
                 <div class="position-relative">
                     <i class="bi bi-cart3 fs-3"></i>
-                    <span id="contadorCarrito" 
-                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    <span id="contadorCarrito"
+                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                         0
                     </span>
                 </div>
@@ -28,9 +30,12 @@
 
     <div id="carouselExampleIndicators" class="carousel slide mb-4" data-bs-ride="carousel">
         <div class="carousel-indicators">
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"
+                aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"
+                aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2"
+                aria-label="Slide 3"></button>
         </div>
         <div class="carousel-inner">
             <div class="carousel-item active">
@@ -43,11 +48,13 @@
                 <img src="../images/Imagen3.png" class="d-block w-100" alt="...">
             </div>
         </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"
+            data-bs-slide="prev">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
             <span class="visually-hidden">Previous</span>
         </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators"
+            data-bs-slide="next">
             <span class="carousel-control-next-icon" aria-hidden="true"></span>
             <span class="visually-hidden">Next</span>
         </button>
@@ -57,12 +64,7 @@
             <div class="col-sm-3">
                 <div class="sidebar">
                     <h2>Categorías</h2>
-                    <ul>
-                        <li><a href="#">Amigurumis</a></li>
-                        <li><a href="#">Vestidos</a></li>
-                        <li><a href="#">Cardigan</a></li>
-                        <li><a href="#">Accesorios</a></li>
-                    </ul>
+                    <div id="contenedorCategorias"></div>
                 </div>
             </div>
 
@@ -74,68 +76,107 @@
     <script src="../js/bootstrap.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-        const url = "https://backcvbgtmdesa.azurewebsites.net/api/productos";
-        const contenedor = document.getElementById("contenedorProductos");
-        const contadorCarrito = document.getElementById("contadorCarrito");
-        let carrito = 0;
+            const url = "https://backcvbgtmdesa.azurewebsites.net/api/productos";
+            const urlCate = "https://backcvbgtmdesa.azurewebsites.net/api/categorias";
 
-        function renderPrecio(p) {
-            const normal = isFinite(+p.Precio) ? (+p.Precio).toFixed(2) : "0.00";
-            if (p.EnOferta && p.PrecioOferta != null && isFinite(+p.PrecioOferta)) {
-            return `
+
+            const contenedor = document.getElementById("contenedorProductos");
+            const contenedorCate = document.getElementById("contenedorCategorias");
+            const contadorCarrito = document.getElementById("contadorCarrito");
+            let carrito = 0;
+
+            function renderPrecio(p) {
+                const normal = isFinite(+p.Precio) ? (+p.Precio).toFixed(2) : "0.00";
+                if (p.EnOferta && p.PrecioOferta != null && isFinite(+p.PrecioOferta)) {
+                    return `
                 <span class="text-danger">$${(+p.PrecioOferta).toFixed(2)}</span>
                 <small class="text-muted text-decoration-line-through">$${normal}</small>
             `;
+                }
+                return `$${normal}`;
             }
-            return `$${normal}`;
-        }
 
-        function crearCard(producto) {
-            const col = document.createElement("div");
-            col.className = "col-sm-4";
+            function mostrarCate(categoria) {
+                const col = document.createElement("div");
+                col.className = "col-sm-4";
+                col.innerHTML = `
+            <ul>
+                <li><a href="http://127.0.0.1:5500/view/index.html?codCat=${categoria.id_categoria}">${categoria.descripcion}</a></li>
+            </ul>
+            `;
 
-            const img = producto.Imagen || "https://via.placeholder.com/400x300?text=Producto";
-            const nombre = producto.Nombre ?? "Producto";
-            const desc = producto.Descripcion ?? "";
+                return col;
+            }
 
-            col.innerHTML = `
+            function crearCard(producto) {
+                const col = document.createElement("div");
+                col.className = "col-sm-4";
+
+
+
+                col.innerHTML = `
             <div class="card h-100">
                 <img src="${producto.Imagen}" class="card-img-top" alt="${producto.Nombre}">
                 <div class="card-body d-flex flex-column">
                 <h6 class="card-title mb-1">${producto.Nombre}</h6>
-                <p class="card-text small text-muted flex-grow-1">${desc}</p>
+                <p class="card-text small text-muted flex-grow-1">${producto.Descripcion}</p>
                 <p class="fw-bold mb-2">${renderPrecio(producto)}</p>
                 <button class="btn btn-primary btn-sm mt-auto agregarCarrito">Añadir al carrito</button>
                 </div>
             </div>
             `;
 
-            col.querySelector(".agregarCarrito").addEventListener("click", () => {
-            carrito++;
-            contadorCarrito.textContent = carrito;
-            });
+                col.querySelector(".agregarCarrito").addEventListener("click", () => {
+                    carrito++;
+                    contadorCarrito.textContent = carrito;
+                });
 
-            return col;
-        }
-
-        fetch(url)
-            .then(r => r.json())
-            .then(productos => {
-            if (!Array.isArray(productos) || productos.length === 0) {
-                contenedor.innerHTML = `<div class="alert alert-warning">No hay productos disponibles.</div>`;
-                return;
+                return col;
             }
-            productos.forEach(prod => contenedor.appendChild(crearCard(prod)));
-            })
-            .catch(err => {
-            console.error("Error al cargar productos:", err);
-            contenedor.innerHTML = `<div class="alert alert-danger">No se pudieron cargar los productos.</div>`;
-            });
+
+            fetch(url)
+                .then(r => r.json())
+                .then(productos => {
+                    if (!Array.isArray(productos) || productos.length === 0) {
+                        contenedor.innerHTML = `<div class="alert alert-warning">No hay productos disponibles.</div>`;
+                        return;
+                    }
+                    // Supongamos que la URL es: https://misitio.com/productos?cat=ropa
+                    const params = new URLSearchParams(window.location.search);
+                    const cat = params.get('codCat');
+                    console.log(cat); // "ropa"
+
+                    // Filtrar los productos que coincidan con CategoriaId
+                    const productosFiltrados = productos.filter(prod => prod.CategoriaId == cat);
+
+                    productosFiltrados.forEach(prod => contenedor.appendChild(crearCard(prod)));
+                })
+                .catch(err => {
+                    console.error("Error al cargar productos:", err);
+                    contenedor.innerHTML = `<div class="alert alert-danger">No se pudieron cargar los productos.</div>`;
+                });
+
+
+            fetch(urlCate)
+                .then(r => r.json())
+                .then(categorias => {
+                    if (!Array.isArray(categorias) || categorias.length === 0) {
+                        contenedorCate.innerHTML = `<div class="alert alert-warning">No hay Categorias.</div>`;
+                        return;
+                    }
+                    categorias.forEach(cate => contenedorCate.appendChild(mostrarCate(cate)));
+                })
+                .catch(err => {
+                    console.error("Error al cargar categorias:", err);
+                    contenedorCate.innerHTML = `<div class="alert alert-danger">No se pudieron cargar las categorias.</div>`;
+                });
         });
+
     </script>
 
     <footer class="pageFooter">
         <p>Diseñado por: Odalis Mariandré Arana Marroquín - 1890-22-7585</p>
     </footer>
 </body>
+
 </html>
