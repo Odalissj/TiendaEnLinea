@@ -99,9 +99,14 @@
             function mostrarCate(categoria) {
                 const col = document.createElement("div");
                 col.className = "col-sm-4";
+
+                //Genera Url para localhost o para web
+                const urlIndex = new URL('index.html', window.location.href);
+                urlIndex.searchParams.set('codCat', categoria.id_categoria);
+
                 col.innerHTML = `
             <ul>
-                <li><a href="http://127.0.0.1:5500/view/index.html?codCat=${categoria.id_categoria}">${categoria.descripcion}</a></li>
+                <li><a href="${urlIndex.href}">${categoria.descripcion}</a></li>
             </ul>
             `;
 
@@ -146,8 +151,15 @@
                     const cat = params.get('codCat');
                     console.log(cat); // "ropa"
 
-                    // Filtrar los productos que coincidan con CategoriaId
-                    const productosFiltrados = productos.filter(prod => prod.CategoriaId == cat);
+                    // Si cat existe, filtramos; si no, mostramos todos
+                    const productosFiltrados = (cat != null && cat !== '')
+                        ? productos.filter(p => String(p.CategoriaId) === String(cat))
+                        : productos;
+
+                    if (productosFiltrados.length === 0) {
+                        contenedor.innerHTML = `<div class="alert alert-info">No hay productos para esta categoría.</div>`;
+                        return;
+                    }
 
                     productosFiltrados.forEach(prod => contenedor.appendChild(crearCard(prod)));
                 })
